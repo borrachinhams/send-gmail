@@ -1,33 +1,38 @@
-import threading
+import configparser
+import codecs
+import os
 
-import conf
 from simplegmail import Gmail
 
 
 gmail = Gmail()
 
+caminho = os.path.abspath(os.getcwd())
+caminho_conf = '{}\\conf.ini'.format(caminho)
+caminho_emails = '{}\\emails.txt'.format(caminho)
+caminho_corpo_email = '{}\\corpo_email.html'.format(caminho)
+
+config = configparser.ConfigParser()
+config.read(caminho_conf)
+
+emails = codecs.open(caminho_emails, 'r')
+emails = emails.read().split()
+
+corpo_email = codecs.open(caminho_corpo_email, 'r')
+corpo_email = corpo_email.read()
+
 def envia_email(email):
   params = {
     "to": email,
-    "sender": conf.de,
-    "subject": conf.assunto,
-    "msg_html": conf.msg_html,
+    "sender": config.get('email', 'de'),
+    "subject": config.get('email', 'assunto'),
+    "msg_html": corpo_email,
     "signature": True  # use my account signature
   }
 
   print("Enviando Email para", email)
-  message = gmail.send_message(**params) 
+  gmail.send_message(**params) 
 
 
-THREADS = []
-for email in conf.para.split():
+for email in emails:
   envia_email(email)
-#   t = threading.Thread(target=envia_email, args=[email])
-#   THREADS.append(t)
-
-# for t in THREADS:
-#   t.start()
-
-# for t in THREADS:
-#   t.join()
-
